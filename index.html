@@ -31,11 +31,100 @@
         <h1>
 <a name="rdfsynopsis" class="anchor" href="#rdfsynopsis"><span class="octicon octicon-link"></span></a>rdfSynopsis</h1>
 
+<h3>
+<a name="a-framework-and-command-line-tool-for-statistical-analyses-of-rdf-datasets" class="anchor" href="#a-framework-and-command-line-tool-for-statistical-analyses-of-rdf-datasets"><span class="octicon octicon-link"></span></a>A framework and command-line tool for statistical analyses of RDF datasets.</h3>
+
 <p>The software rdfSynopsis was written in Java. It uses the Apache Jena framework
-[6] to process RDF data and to query SPARQL endpoints. The goal for the design
+to process RDF data and to query SPARQL endpoints. The goal for the design
 of RDFSynopsis was to write code that could be used both, as a stand-alone tool
 operated from the command-line, and as a framework of classes for reuse in other
-software. </p>
+software.</p>
+
+<h4>
+<a name="content" class="anchor" href="#content"><span class="octicon octicon-link"></span></a>Content</h4>
+
+<ol>
+<li>Approach</li>
+<li>Architecture</li>
+<li>Usage</li>
+<li>Installation (N/A)</li>
+<li>Problems, Known Bugs, Shortcomings (N/A)</li>
+<li>License (N/A)</li>
+</ol><hr><h2>
+<a name="approach" class="anchor" href="#approach"><span class="octicon octicon-link"></span></a>Approach</h2>
+
+<p>During our investigation of structure analysis of RDF datasets, we identified 18 criteria, which
+help understanding an RDF dataset.</p>
+
+<p>We use two general approaches for the SPARQL-based structural analysis of
+RDF datasets; first, the Specific Query Approach (SQA), and second,
+the Triple Stream Approach (TSA).</p>
+
+<h3>
+<a name="specific-query-approach-sqa" class="anchor" href="#specific-query-approach-sqa"><span class="octicon octicon-link"></span></a>Specific Query Approach (SQA)</h3>
+
+<p>Our first approach to analyze a dataset that is available through a given SPARQL
+endpoint, is to formulate one SPARQL query per measure. We refer to this as the
+Specific Query Approach (SQA).</p>
+
+<p>With SQA, we conduct a full analysis of a dataset by subsequently performing a set
+of queries, each of which is specifically tailored to one measure. This simple process
+is visualized in the sequence diagram.</p>
+
+<p><img src="http://tholst.github.io/rdfSynopsis/SequenceSQA.PNG" alt="SQA Sequence Diagram"></p>
+
+<h3>
+<a name="triple-stream-approach-tsa" class="anchor" href="#triple-stream-approach-tsa"><span class="octicon octicon-link"></span></a>Triple Stream Approach (TSA)</h3>
+
+<p>Our second approach for a SPARQL-based dataset analysis, is to retrieve and analyze
+a sequence of triples. We refer to this as the Triple Stream Approach (TSA).
+With TSA, we conduct a full analysis of a dataset by subsequently retrieving all
+triples of a dataset. The different measures are implemented in terms of triple filters; each measure decides whether and how it takes a triple into account. The analysis is
+finished when all triples of a dataset have been filtered by each measure.</p>
+
+<p>In the majority of cases it will be infeasible to retrieve the full dataset with one query.
+Triple stores usually constrain memory and time used per query, and these constraints
+are easily exceeded for larger datasets. We therefore perform several queries each
+retrieving only a part of the full dataset. This process is visualized in the sequence
+diagram.</p>
+
+<p><img src="http://tholst.github.io/rdfSynopsis/SequenceTSA.PNG" alt="TSA Sequence Diagram"></p>
+
+<p>The following SPARQL query can be used to subsequently retrieve all triples of a
+dataset.</p>
+
+<pre lang="SPARQL"><code>SELECT ?s ?p ?o
+WHERE {?s ?p ?o.}
+ORDER BY ...
+LIMIT ...
+OFFSET ...
+</code></pre>
+
+<p>The graph pattern {?s ?p ?o.} matches all triples (line 2). We use the LIMIT keyword
+to define the “chunk size”, i.e., an upper bound on the number of received triples
+(line 4). The ORDER BY clause is used to define a sequential order on the otherwise
+unordered RDF graph (line 3). We iterate over this sequence by subsequently using
+offsets incremented by the “chunk size” (line 5).
+The figure below illustrates how the different SPARQL keywords define a sequence of triple
+“chunks”, that can be iteratively requested, to create the triple stream.</p>
+
+<p><img src="http://tholst.github.io/rdfSynopsis/LimitOffset.png" alt="Creating a Triple Stream with SPARQL"></p>
+
+<h4>
+<a name="partial-analysis--random-sampling" class="anchor" href="#partial-analysis--random-sampling"><span class="octicon octicon-link"></span></a>Partial Analysis &amp; Random Sampling</h4>
+
+<p>An obvious disadvantage of the plain Triple Stream Approach is that it requires
+the transfer of the whole dataset from the SPARQL endpoint; a very expensive and
+time-consuming process. A potential solution to this problem is to refrain from a full
+analysis and only request a subset of all triples.
+Because the ORDER BY clause imposes some sequence on the triples in the dataset, a
+partial analysis, that only takes the first k triples into consideration, is very unlikely
+to produce results that are representative for the full dataset.
+In order to mitigate this adverse effect and to obtain a more representative sample of
+triples, we follow an approach to randomly select the parts we request from a dataset.
+This approach is visualized in the figure below.</p>
+
+<p><img src="http://tholst.github.io/rdfSynopsis/LimitOffsetRandomSamplingYellow.png" alt="Random Sampling TSA"></p>
 
 <hr><h2>
 <a name="architecture" class="anchor" href="#architecture"><span class="octicon octicon-link"></span></a>Architecture</h2>
@@ -185,7 +274,8 @@ Usage: rdfSynopsis [options]
        Use all available criteria for analysis.
        Default: false
     -c, --criteria
-       A space-separated list of criteria to use for analysis, e.g, "-c 3 5 7"
+       A space-separated list of criteria to use for analysis, 
+       e.g, "-c 3 5 7"
     -ep, --endpoint
        The SPARQL endpoint URL that shall be analyzed.
     -f, --file
@@ -197,10 +287,12 @@ Usage: rdfSynopsis [options]
        Print list of analytical criteria.
        Default: false
     -mnq, --maximumNumberQueries
-       The maximum number of queries to perform a partial analysis; "-1" means "infinite". (TSA only, NA)
+       The maximum number of queries to perform a partial 
+       analysis; "-1" means "infinite". (TSA only, NA)
        Default: -1
     -ob, --orderBy
-       One of the following variables used to define an order in the triple stream: subject, predicate, object (TSA only)
+       One of the following variables used to define an order in 
+       the triple stream: subject, predicate, object (TSA only)
        Default: subject
     -o, --outFile
        The filename used to store analysis results. (NA)
@@ -214,7 +306,8 @@ Usage: rdfSynopsis [options]
        Use one specific SPARQL query per criterion. (SQA)
        Default: false
     -tl, --tripleLimit
-       The maximum number of triples requested per query. (TSA only)
+       The maximum number of triples requested per query. 
+       (TSA only)
        Default: 50000
     -tsa, --tripleStream
        Use generic SPARQL queries to create a triple stream. (TSA)
