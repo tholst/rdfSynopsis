@@ -1,0 +1,7 @@
+SELECT ?predVocab (COUNT(?p) AS ?numUses)
+WHERE {
+  ?s ?p ?o .
+  FILTER(isIRI(?p))
+  BIND(REPLACE(str(?p), "[^/#]*$", "") AS ?predVocab)
+}
+GROUP BY ?predVocab

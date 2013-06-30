@@ -1,0 +1,10 @@
+SELECT (COUNT(DISTINCT ?bnode) AS ?numSubjectOnlyBlanks)
+WHERE {
+  ?bnode ?p ?o .
+  FILTER isBlank(?bnode)
+  FILTER NOT EXISTS {
+    ?anySubject ?hasObject ?bnode . }
+  FILTER NOT EXISTS {
+    ?bnode ?ifp ?id .
+    ?ifp a owl:InverseFunctionalProperty . }
+}

@@ -1,0 +1,6 @@
+SELECT ?class (COUNT(*) as ?numTriplesPerClass)
+WHERE {
+  ?s ?p ?o .
+  ?s a ?class .
+}
+GROUP BY ?class

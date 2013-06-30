@@ -1,0 +1,44 @@
+SELECT (COUNT(DISTINCT ?cos) AS ?numCommonObjectSubjects)
+       (COUNT(DISTINCT ?dos) AS ?numDistinctObjectsSubjects)
+WHERE {
+  { ?s1 ?p1 ?cos . 
+    ?cos ?p2 ?o1 . 
+    FILTER isIRI(?cos) }
+UNION 
+  { ?dos ?p3 ?o2 . 
+    FILTER isIRI(?dos) }
+UNION 
+  { ?s2 ?p4 ?dos . 
+    FILTER isIRI(?dos) }
+}	
+
+ODER
+
+SELECT DISTINCT ?c (COUNT(*) AS ?numLinks)
+WHERE {
+	?s ?p ?o .
+	?s a ?c .
+	?o a ?c .
+}
+GROUP BY ?c
+
+ODER 
+
+SELECT (COUNT(DISTINCT ?c) AS ?numLinkedClasses) (COUNT(DISTINCT ?dc) AS ?numClasses) (?numLinkedClasses/?numClasses AS ?linkedClassRatio)
+WHERE {
+	{
+		?s ?p ?o .
+		?s a ?c .
+		?o a ?c .
+	}
+	UNION
+	{
+		?s ?p ?o .
+		?s a ?dc .
+	}
+	UNION
+	{
+		?s ?p ?o .
+		?o a ?dc .
+	}
+}

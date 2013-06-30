@@ -1,0 +1,6 @@
+SELECT ?subclass ?superclass
+WHERE { 
+  ?subclass rdfs:subClassOf ?superclass . 
+  FILTER (?subclass != ?superclass)
+  FILTER (?superclass != rdfs:Resource)
+}

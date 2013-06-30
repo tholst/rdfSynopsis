@@ -1,0 +1,7 @@
+SELECT (COUNT(DISTINCT ?class) AS ?numDefClasses)
+(COUNT(DISTINCT ?prop) AS ?numDefProperties)
+(COUNT(DISTINCT ?s) AS ?numTypedResources)
+WHERE {{?class a rdfs:Class. FILTER isIRI(?class)}
+UNION {?class a owl:Class. FILTER isIRI(?class)}
+UNION {?prop a rdf:Property. FILTER isIRI(?prop)}
+UNION {?s a ?x. FILTER isIRI(?s)}}

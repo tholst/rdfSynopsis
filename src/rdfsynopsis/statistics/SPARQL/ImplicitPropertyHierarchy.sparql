@@ -1,0 +1,12 @@
+SELECT ?subProp ?superProp
+WHERE {
+  ?s ?subProp ?o.
+  ?s ?superProp ?o.
+  FILTER (?subProp != ?superProp)
+  FILTER NOT EXISTS {
+    ?anyS ?subProp ?anyO.
+    FILTER NOT EXISTS { 
+      ?anyS ?superProp ?anyO. }
+  }
+}
+GROUP BY ?subProp ?superProp

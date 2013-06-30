@@ -1,0 +1,11 @@
+SELECT (COUNT(DISTINCT ?TS) AS ?numTypedSubjects)
+       (COUNT(DISTINCT ?S) AS ?numSubjects)
+WHERE {
+  { ?TS a ?class .
+    ?TS ?p ?o . 
+    FILTER (?class != rdfs:Resource)
+    FILTER (?p != rdf:type) }
+  UNION 
+  { ?S ?p ?o . 
+    FILTER (?p != rdf:type)}  
+}

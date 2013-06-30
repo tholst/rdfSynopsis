@@ -1,0 +1,7 @@
+SELECT ?class ?property (COUNT(*) as ?numUses)
+WHERE { 
+  ?s ?property ?o .
+  OPTIONAL {?s a ?class}
+  FILTER(?property != rdf:type)
+}
+GROUP BY ?class ?property

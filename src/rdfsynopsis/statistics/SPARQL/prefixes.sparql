@@ -1,0 +1,50 @@
+PREFIX rdf:       <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:      <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:       <http://www.w3.org/2002/07/owl#>
+PREFIX skos:      <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfa:    <http://www.w3.org/ns/rdfa#>
+PREFIX rif:     <http://www.w3.org/2007/rif#>
+PREFIX time:       <http://www.w3.org/2006/time#>
+PREFIX math:       <http://www.w3.org/2000/10/swap/math#>
+PREFIX ical:       <http://www.w3.org/2002/12/cal/ical#>
+PREFIX atom:       <http://www.w3.org/2005/Atom/>
+PREFIX cert:       <http://www.w3.org/ns/auth/cert#>
+PREFIX bookmark:   <http://www.w3.org/2002/01/bookmark#>
+
+PREFIX video:      <http://purl.org/media/video#>
+PREFIX audio:      <http://purl.org/media/audio#>
+PREFIX gr:        <http://purl.org/goodrelations/v1#>
+PREFIX dc:        <http://purl.org/dc/elements/1.1/>
+PREFIX dct:       <http://purl.org/dc/terms/>
+PREFIX mo:    <http://purl.org/ontology/mo/>
+PREFIX obo:       <http://purl.obolibrary.org/obo/>
+PREFIX uniprot:   <http://purl.uniprot.org/>
+PREFIX book:       <http://purl.org/NET/book/vocab#>
+PREFIX bibo:       <http://purl.org/ontology/bibo/>
+PREFIX rev:        <http://purl.org/stuff/rev#>
+
+
+PREFIX foaf:  <http://xmlns.com/foaf/0.1/>
+PREFIX geo:       <http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX geonames:  <http://www.geonames.org/ontology#>
+PREFIX chebi:     <http://bio2rdf.org/chebi:>
+PREFIX qudt:  <http://qudt.org/1.1/schema/qudt#>
+PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
+PREFIX exif:  <http://www.w3.org/2003/12/exif/ns#>
+
+PREFIX dbo:   <http://dbpedia.org/ontology/>
+PREFIX dbp:   <http://dbpedia.org/property/>
+PREFIX dbpedia: <http://dbpedia.org/resource/>
+PREFIX yago:  <http://dbpedia.org/class/yago/>
+
+PREFIX void:  <http://rdfs.org/ns/void#>
+PREFIX sioc:    <http://rdfs.org/sioc/ns#>
+
+PREFIX fb:    <http://rdf.freebase.com/ns/>
+PREFIX nyt:     <http://data.nytimes.com/element/>
+PREFIX og:         <http://ogp.me/ns#>
+PREFIX geospecies: <http://rdf.geospecies.org/ont/geospecies#>
+PREFIX address:    <http://schemas.talis.com/2005/address/schema#>
+PREFIX mmd:       <http://musicbrainz.org/ns/mmd-1.0#>
+PREFIX opencyc:   <http://sw.opencyc.org/2008/06/10/concept/>
+PREFIX wb: <http://www.worldbank.org/>

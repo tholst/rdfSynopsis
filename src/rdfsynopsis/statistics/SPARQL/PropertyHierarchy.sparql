@@ -1,0 +1,5 @@
+SELECT ?subprop ?superprop
+WHERE { 
+  ?subprop rdfs:subPropertyOf ?superprop . 
+  FILTER (?subprop != ?superprop)
+}

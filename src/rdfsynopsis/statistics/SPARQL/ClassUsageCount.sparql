@@ -1,0 +1,5 @@
+SELECT ?class (COUNT(DISTINCT ?I) AS ?numInstances)
+WHERE {
+  ?I rdf:type ?class .
+}
+GROUP BY ?class

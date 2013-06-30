@@ -1,0 +1,16 @@
+SELECT (COUNT(DISTINCT ?CL) AS ?numDefClasses)
+       (COUNT(DISTINCT ?CO) AS ?numDefConcepts)
+       (COUNT(DISTINCT ?P) AS ?numDefProperties)
+       (COUNT(DISTINCT ?I) AS ?numTypedResources)
+WHERE {
+  { ?CL a rdfs:Class. }
+  UNION 
+  { ?CL a owl:Class. }
+  UNION 
+  { ?CO a skos:Concept. }
+  UNION 
+  { ?P a rdf:Property. }
+  UNION 
+  { ?I a ?class. 
+    FILTER(?class != rdfs:Resource)}
+}

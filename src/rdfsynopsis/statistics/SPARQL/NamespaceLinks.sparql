@@ -1,0 +1,9 @@
+SELECT ?NS1 ?prop ?NS2 (COUNT(*) AS ?numLinks)
+WHERE {
+  ?res1 ?prop ?res2 .
+  FILTER(isIRI(?res1))
+  FILTER(isIRI(?res2))
+  BIND(REPLACE(str(?res1), "[^/#]*$", "") AS ?NS1)
+  BIND(REPLACE(str(?res2), "[^/#]*$", "") AS ?NS2)
+}
+GROUP BY ?NS1 ?prop ?NS2

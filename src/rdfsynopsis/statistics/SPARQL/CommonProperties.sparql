@@ -1,0 +1,18 @@
+SELECT DISTINCT ?class ?property
+WHERE {
+
+{SELECT ?class ?property (COUNT(DISTINCT ?I) as ?numInstances)
+WHERE {
+  ?I ?property ?o .
+  ?I a ?class .
+  FILTER (?property != rdf:type)
+}
+GROUP BY ?class ?property
+}	
+{
+ SELECT ?class (COUNT(DISTINCT ?I) AS ?numI)
+ WHERE {?I a ?class. }
+ GROUP BY ?class
+}
+FILTER (?numInstances = ?numI)
+}

@@ -1,0 +1,4 @@
+SELECT (COUNT(*) as ?sameAs)
+WHERE { 
+  ?s owl:sameAs ?o . 
+}

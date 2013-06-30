@@ -1,0 +1,5 @@
+SELECT ?property (COUNT(*) as ?numUses)
+WHERE { 
+  ?s ?property ?o . 
+}
+GROUP BY ?property
