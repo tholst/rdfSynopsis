@@ -28,13 +28,108 @@
         </ul>
       </header>
       <section>
-        <p>The software RDFSynopsis was written in Java. It uses the Apache Jena framework
-[6] to process RDF data and to query SPARQL endpoints. The goal for the design
+        <h1>
+<a name="rdfsynopsis" class="anchor" href="#rdfsynopsis"><span class="octicon octicon-link"></span></a>rdfSynopsis</h1>
+
+<h3>
+<a name="a-framework-and-command-line-tool-for-statistical-analyses-of-rdf-datasets" class="anchor" href="#a-framework-and-command-line-tool-for-statistical-analyses-of-rdf-datasets"><span class="octicon octicon-link"></span></a>A framework and command-line tool for statistical analyses of RDF datasets.</h3>
+
+<p>The software rdfSynopsis was written in Java. It uses the Apache Jena framework
+to process RDF data and to query SPARQL endpoints. The goal for the design
 of RDFSynopsis was to write code that could be used both, as a stand-alone tool
 operated from the command-line, and as a framework of classes for reuse in other
-software. </p>
+software.</p>
 
-<hr><p>The figure below presents the class hierarchy and package arrangement.
+<h4>
+<a name="content" class="anchor" href="#content"><span class="octicon octicon-link"></span></a>Content</h4>
+
+<ol>
+<li>Approach</li>
+<li>Architecture</li>
+<li>Usage</li>
+<li>Installation (N/A)</li>
+<li>Problems, Known Bugs, Shortcomings (N/A)</li>
+<li>License (N/A)</li>
+</ol><hr><h2>
+<a name="approach" class="anchor" href="#approach"><span class="octicon octicon-link"></span></a>Approach</h2>
+
+<p>During our investigation of structure analysis of RDF datasets, we identified 18 criteria, which
+help understanding an RDF dataset.</p>
+
+<p>We use two general approaches for the SPARQL-based structural analysis of
+RDF datasets; first, the Specific Query Approach (SQA), and second,
+the Triple Stream Approach (TSA).</p>
+
+<h3>
+<a name="specific-query-approach-sqa" class="anchor" href="#specific-query-approach-sqa"><span class="octicon octicon-link"></span></a>Specific Query Approach (SQA)</h3>
+
+<p>Our first approach to analyze a dataset that is available through a given SPARQL
+endpoint, is to formulate one SPARQL query per measure. We refer to this as the
+Specific Query Approach (SQA).</p>
+
+<p>With SQA, we conduct a full analysis of a dataset by subsequently performing a set
+of queries, each of which is specifically tailored to one measure. This simple process
+is visualized in the sequence diagram.</p>
+
+<p><img src="http://tholst.github.io/rdfSynopsis/SequenceSQA.PNG" alt="SQA Sequence Diagram"></p>
+
+<h3>
+<a name="triple-stream-approach-tsa" class="anchor" href="#triple-stream-approach-tsa"><span class="octicon octicon-link"></span></a>Triple Stream Approach (TSA)</h3>
+
+<p>Our second approach for a SPARQL-based dataset analysis, is to retrieve and analyze
+a sequence of triples. We refer to this as the Triple Stream Approach (TSA).
+With TSA, we conduct a full analysis of a dataset by subsequently retrieving all
+triples of a dataset. The different measures are implemented in terms of triple filters; each measure decides whether and how it takes a triple into account. The analysis is
+finished when all triples of a dataset have been filtered by each measure.</p>
+
+<p>In the majority of cases it will be infeasible to retrieve the full dataset with one query.
+Triple stores usually constrain memory and time used per query, and these constraints
+are easily exceeded for larger datasets. We therefore perform several queries each
+retrieving only a part of the full dataset. This process is visualized in the sequence
+diagram.</p>
+
+<p><img src="http://tholst.github.io/rdfSynopsis/SequenceTSA.PNG" alt="TSA Sequence Diagram"></p>
+
+<p>The following SPARQL query can be used to subsequently retrieve all triples of a
+dataset.</p>
+
+<pre lang="SPARQL"><code>SELECT ?s ?p ?o
+WHERE {?s ?p ?o.}
+ORDER BY ...
+LIMIT ...
+OFFSET ...
+</code></pre>
+
+<p>The graph pattern {?s ?p ?o.} matches all triples (line 2). We use the LIMIT keyword
+to define the “chunk size”, i.e., an upper bound on the number of received triples
+(line 4). The ORDER BY clause is used to define a sequential order on the otherwise
+unordered RDF graph (line 3). We iterate over this sequence by subsequently using
+offsets incremented by the “chunk size” (line 5).
+The figure below illustrates how the different SPARQL keywords define a sequence of triple
+“chunks”, that can be iteratively requested, to create the triple stream.</p>
+
+<p><img src="http://tholst.github.io/rdfSynopsis/LimitOffset.png" alt="Creating a Triple Stream with SPARQL"></p>
+
+<h4>
+<a name="partial-analysis--random-sampling" class="anchor" href="#partial-analysis--random-sampling"><span class="octicon octicon-link"></span></a>Partial Analysis &amp; Random Sampling</h4>
+
+<p>An obvious disadvantage of the plain Triple Stream Approach is that it requires
+the transfer of the whole dataset from the SPARQL endpoint; a very expensive and
+time-consuming process. A potential solution to this problem is to refrain from a full
+analysis and only request a subset of all triples.
+Because the ORDER BY clause imposes some sequence on the triples in the dataset, a
+partial analysis, that only takes the first k triples into consideration, is very unlikely
+to produce results that are representative for the full dataset.
+In order to mitigate this adverse effect and to obtain a more representative sample of
+triples, we follow an approach to randomly select the parts we request from a dataset.
+This approach is visualized in the figure below.</p>
+
+<p><img src="http://tholst.github.io/rdfSynopsis/LimitOffsetRandomSamplingYellow.png" alt="Random Sampling TSA"></p>
+
+<hr><h2>
+<a name="architecture" class="anchor" href="#architecture"><span class="octicon octicon-link"></span></a>Architecture</h2>
+
+<p>The figure below presents the class hierarchy and package arrangement.
 Three concepts are at the center of RDFSynopsis’s design: Datasets, Statistical
 Criteria, and Analyzers. The basic idea behind these concepts is to define a dataset
 analysis in three steps.</p>
@@ -43,7 +138,231 @@ analysis in three steps.</p>
 <li>Define the dataset that shall be analyzed.</li>
 <li>Define the statistical criteria according to which the dataset shall be analyzed.</li>
 <li>Provide the dataset and the criteria to an analyzer, and let it do the work.</li>
+
 </ol><p><a href="http://tholst.github.io/rdfSynopsis/classDiagram1.jpg"><img src="http://tholst.github.io/rdfSynopsis/classDiagram1.jpg" alt="Architecture of rdfSynopsis"></a></p>
+
+
+<h3>
+<a name="datasets" class="anchor" href="#datasets"><span class="octicon octicon-link"></span></a>Datasets</h3>
+
+<p>A dataset represents any collection of RDF data. Our class SparqlDataset represents
+datasets that can be queried with SPARQL queries. The class offers a
+single method query that can be used to pose SPARQL queries against the dataset.
+Throughout the code, we only use this method for data access. The subclasses
+SparqlEndpointDataset and InMemoryDataset encapsulate access to remote datasets
+which are identified via an endpoint URI, and local datasets which are loaded into
+memory, respectively.</p>
+
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">SparqlDataset</span> <span class="kd">extends</span> <span class="n">Dataset</span> <span class="o">{</span>   
+  <span class="kd">public</span> <span class="kd">abstract</span> <span class="n">QueryExecution</span> <span class="nf">query</span><span class="o">(</span><span class="n">Query</span> <span class="n">query</span><span class="o">);</span>
+<span class="o">}</span>
+</pre></div>
+
+<h3>
+<a name="statistical-criteria" class="anchor" href="#statistical-criteria"><span class="octicon octicon-link"></span></a>Statistical Criteria</h3>
+
+<p>A statistical criterion represents a single analytic measure. The abstract class
+StatisticalCriterion provides three public methods. The first, flushLog, prints
+the current state of measurements. The second, considerTriple, represents the
+filterTriple(s, p, o) function, implementing the Triple
+Stream Approach . The third public method is processSparqlDataset which implements
+the Specific Query Approach. It uses the query method of the provided
+SparqlDataset, and delegates parsing of query results to its concrete subclasses. The
+specific SPARQL queries for each criterion are loaded from separate .sparql-files.
+This process is implemented in StatisticalCriterion, but has been omitted for
+brevity.</p>
+
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">StatisticalCriterion</span> <span class="o">{</span>  
+  <span class="c1">// print current measurements</span>
+  <span class="kd">public</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">flushLog</span><span class="o">(</span><span class="n">PrintStream</span> <span class="n">ps</span><span class="o">);</span>
+
+  <span class="c1">// filter triple (TSA)</span>
+  <span class="kd">public</span> <span class="kd">abstract</span> 
+  <span class="kt">void</span> <span class="nf">considerTriple</span><span class="o">(</span><span class="n">Resource</span> <span class="n">s</span><span class="o">,</span> <span class="n">Property</span> <span class="n">p</span><span class="o">,</span> <span class="n">RDFNode</span> <span class="n">o</span><span class="o">);</span>
+
+  <span class="c1">// process query results (SQA)</span>
+  <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">processQueryResults</span><span class="o">(</span><span class="n">ResultSet</span> <span class="n">res</span><span class="o">);</span>
+
+  <span class="c1">// query dataset (SQA)</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">processSparqlDataset</span><span class="o">(</span><span class="n">SparqlDataset</span> <span class="n">ds</span><span class="o">)</span> <span class="o">{</span>
+    <span class="o">...</span>
+    <span class="c1">// execute query and obtain results</span>
+    <span class="n">QueryExecution</span> <span class="n">qe</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="na">query</span><span class="o">(</span><span class="n">query</span><span class="o">);</span>
+    <span class="n">ResultSet</span> <span class="n">results</span> <span class="o">=</span> <span class="n">qe</span><span class="o">.</span><span class="na">execSelect</span><span class="o">();</span>
+
+    <span class="c1">// delegate result processing to subclass</span>
+    <span class="n">processQueryResults</span><span class="o">(</span><span class="n">results</span><span class="o">);</span>  
+    <span class="o">...</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+
+<h3>
+<a name="analyzer" class="anchor" href="#analyzer"><span class="octicon octicon-link"></span></a>Analyzer</h3>
+
+<p>An analyzer represents a single analysis configuration. The AbstractAnalyzer
+class defines four public methods. The first two, addCriterion and setDs, are
+used to configure the analysis with regard to dataset and criteria. The third method,
+performAnalysis, actually performs the analysis and prints the results to the provided
+PrintStream. The fourth method is equals. AbstractAnalyzer and all subclasses
+of StatisticalCriterion re-implement this standard method, making analysis
+results comparable by calling analyzer1.equals(analyzer2). The performAnalysis
+method is implemented differently for SQA and TSA. The subclass SparqlAnalyzer
+(SQA) calls processSparqlDataset for each criterion, while TripleStreamAnalyzer
+(TSA) creates a triple stream and calls considerTriple for each criterion and triple.
+The triple stream is created by subsequently querying the dataset with increasing
+OFFSET parameters. Random Sampling is implemented by calling
+Collections.shuffle(offsets) on a precomputed list of offsets.</p>
+
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">AbstractAnalyzer</span> <span class="kd">implements</span> <span class="n">Analyzer</span> <span class="o">{</span>
+  <span class="c1">// define criteria</span>
+  <span class="kd">public</span> <span class="n">Analyzer</span> <span class="nf">addCriterion</span><span class="o">(</span><span class="n">StatisticalCriterion</span> <span class="n">sc</span><span class="o">)</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+
+  <span class="c1">// define dataset</span>
+  <span class="kd">public</span> <span class="n">Analyzer</span> <span class="nf">setDs</span><span class="o">(</span><span class="n">SparqlDataset</span> <span class="n">ds</span><span class="o">)</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+
+  <span class="c1">// perform analysis and output results</span>
+  <span class="kd">public</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">performAnalysis</span><span class="o">(</span><span class="n">PrintStream</span> <span class="n">ps</span><span class="o">);</span>
+
+  <span class="c1">// compare analysis results</span>
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">equals</span><span class="o">(</span><span class="n">Object</span> <span class="n">obj</span><span class="o">)</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+
+<p>The classes in the eval package have been implemented for the evaluation of our
+work, and do not represent core components of rdfSynopsis. Hence, they
+are not further discussed.</p>
+
+<hr><h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<h3>
+<a name="framework-usage" class="anchor" href="#framework-usage"><span class="octicon octicon-link"></span></a>Framework Usage</h3>
+
+<p>The following examples demonstrate the use of RDFSynopsis’s classes. We analyze
+the number of triples of a SPARQL endpoint using TSA (Example 1), and find the
+common properties of an in-memory dataset using SQA (Example 2).</p>
+
+<h4>
+<a name="example-1" class="anchor" href="#example-1"><span class="octicon octicon-link"></span></a>Example 1</h4>
+
+<div class="highlight"><pre><span class="n">TripleStreamAnalyzer</span> <span class="n">tsa</span> <span class="o">=</span> <span class="k">new</span> <span class="n">TripleStreamAnalyzer</span><span class="o">()</span>
+  <span class="o">.</span><span class="na">addCriterion</span><span class="o">(</span><span class="k">new</span> <span class="n">NumTriples</span><span class="o">())</span>
+  <span class="o">.</span><span class="na">setDs</span><span class="o">(</span><span class="k">new</span> <span class="n">SparqlEndpointDataset</span><span class="o">(</span><span class="s">"http://..."</span><span class="o">))</span>
+  <span class="o">.</span><span class="na">setRandomSampling</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
+  <span class="o">.</span><span class="na">setTripleLimit</span><span class="o">(</span><span class="mi">500</span><span class="o">);</span>
+<span class="n">tsa</span><span class="o">.</span><span class="na">performAnalysis</span><span class="o">();</span>
+</pre></div>
+
+<h4>
+<a name="example-2" class="anchor" href="#example-2"><span class="octicon octicon-link"></span></a>Example 2</h4>
+
+<div class="highlight"><pre><span class="n">SparqlAnalyzer</span> <span class="n">sqa</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SparqlAnalyzer</span><span class="o">()</span>
+  <span class="o">.</span><span class="na">addCriterion</span><span class="o">(</span><span class="k">new</span> <span class="n">CommonProperties</span><span class="o">())</span>
+  <span class="o">.</span><span class="na">setDs</span><span class="o">(</span><span class="k">new</span> <span class="n">InMemoryDataset</span><span class="o">(</span><span class="s">"file:../data/peel.rdf"</span><span class="o">));</span>
+<span class="n">sqa</span><span class="o">.</span><span class="na">performAnalysis</span><span class="o">();</span>
+</pre></div>
+
+<h3>
+<a name="command-line-usage" class="anchor" href="#command-line-usage"><span class="octicon octicon-link"></span></a>Command-Line Usage</h3>
+
+<p>RDFSynopsis also provides a command-line interface. </p>
+
+<pre><code>&gt; java -jar rdfSynopsis.jar --help
+Usage: rdfSynopsis [options]
+  Options:
+    -all, --allCriteria
+       Use all available criteria for analysis.
+       Default: false
+    -c, --criteria
+       A space-separated list of criteria to use for analysis, 
+       e.g, "-c 3 5 7"
+    -ep, --endpoint
+       The SPARQL endpoint URL that shall be analyzed.
+    -f, --file
+       The RDF dataset file that shall be analyzed.
+    -h, --help
+       Print this usage information.
+       Default: false
+    -lc, --listCriteria
+       Print list of analytical criteria.
+       Default: false
+    -mnq, --maximumNumberQueries
+       The maximum number of queries to perform a partial 
+       analysis; "-1" means "infinite". (TSA only, NA)
+       Default: -1
+    -ob, --orderBy
+       One of the following variables used to define an order in 
+       the triple stream: subject, predicate, object (TSA only)
+       Default: subject
+    -o, --outFile
+       The filename used to store analysis results. (NA)
+    -rand, --randomSampling
+       Use a "random sampled" triple stream. (TSA only)
+       Default: true
+    -rf, --resultFormat
+       One of the following result output formats: text,... (NA)
+       Default: text
+    -sqa, --specificQuery
+       Use one specific SPARQL query per criterion. (SQA)
+       Default: false
+    -tl, --tripleLimit
+       The maximum number of triples requested per query. 
+       (TSA only)
+       Default: 50000
+    -tsa, --tripleStream
+       Use generic SPARQL queries to create a triple stream. (TSA)
+       Default: false
+</code></pre>
+
+<pre><code>&gt; java -jar rdfSynopsis.jar --listCriteria
+[id]    criterion
+------------------------------------------
+[1] class usage count
+[2] triples per subject class
+[3] explicit class hierarchy
+[4] implicit class hierarchy
+[5] ontology-ratio
+[6] typed-subject-ratio
+[7] property usage
+[8] predicate vocabularies
+[9] property usage  per subject class
+[10]    class instances per property
+[11]    explicit property hierarchy
+[12]    implicit property hierarchy
+[13]    distinct blank subjects
+[14]    namespace links
+[15]    distinct subject-only blanks
+[16]    triples
+[17]    sameAs
+[18]    common properties
+</code></pre>
+
+<p>The above examples can be invoked from the command-line. The -c parameter is used followed by a list of
+numbers to define the desired criteria; -lc prints the number-to-criteria mapping.</p>
+
+<h4>
+<a name="example-1-1" class="anchor" href="#example-1-1"><span class="octicon octicon-link"></span></a>Example 1</h4>
+
+<pre><code>&gt; java -jar rdfSynopsis.jar -tsa -rand -tl 500 -c 16 -ep http...
+</code></pre>
+
+<h4>
+<a name="example-2-1" class="anchor" href="#example-2-1"><span class="octicon octicon-link"></span></a>Example 2</h4>
+
+<pre><code>&gt; java -jar rdfSynopsis.jar -sqa -c 18 -f ../data/peel.rdf
+</code></pre>
+
+<hr><h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<hr><h2>
+<a name="known-bugs-problems-shortcomings" class="anchor" href="#known-bugs-problems-shortcomings"><span class="octicon octicon-link"></span></a>Known Bugs, Problems, Shortcomings</h2>
+
+<hr><h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+>>>>>>> 97b520f439df7abbf3a6cf39e6242ccc9f95d594
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/tholst">tholst</a></p>
